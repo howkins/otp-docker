@@ -1,0 +1,74 @@
+version: "3.9"
+services:
+  api:
+    container_name: api
+    build:
+      args:
+        user: howkins
+        uid: 1000
+      context: ./api
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    working_dir: /var/www/
+    depends_on:
+      - nginx
+      - db
+    volumes:
+      - ../otp-backend:/var/www
+    networks:
+      - backend
+
+  nginx:
+    container_name: nginx
+    image: nginx:alpine
+    restart: unless-stopped
+    ports:
+      - 80:80
+    volumes:
+      - ../otp-backend:/var/www
+      - ./nginx/conf.d:/etc/nginx/conf.d/
+    working_dir: /var/www/
+    networks:
+      - backend
+
+  db:
+    container_name: db
+    image: postgres
+    restart: always
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: app
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - '/postgre:/var/lib/postgresql/data'
+    networks:
+      - backend
+
+  app:
+    container_name: app
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - ../otp-frontend:/app
+    deploy:
+      replicas: 1
+      update_config:
+        parallelism: 1
+        delay: 10s
+      restart_policy:
+        condition: on-failure
+    working_dir: /app
+    command: ["npm","start"]
+
+volumes:
+  app:
+
+networks:
+  backend:
+    driver: bridge
