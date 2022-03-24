@@ -37,7 +37,10 @@ Then, with a single command, you create and start all the services from your con
 1. Open terminal and navigate to local copy of this repo.
 2. Run command: 
     ```bash 
-    docker-compose up
+    docker-compose up -d
+    docker exec -it api cp .env.example .env
+    docker exec -it api php artisan key:generate
+    docker exec -it api composer update
     ```
 
 ## 💡 Useful commands
