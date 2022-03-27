@@ -41,6 +41,7 @@ Then, with a single command, you create and start all the services from your con
     docker exec -it api cp .env.example .env
     docker exec -it api php artisan key:generate
     docker exec -it api composer update
+    docker exec -it api php artisan migrate
     ```
 
 ## 💡 Useful commands
